@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', action='store_true',
                     help='resume from checkpoint')
-args = parser.parse_args()
+# args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
@@ -76,17 +76,17 @@ if device == 'cuda':
     net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 
-if args.resume:
-    # Load checkpoint.
-    print('==> Resuming from checkpoint..')
-    assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-    checkpoint = torch.load('./checkpoint/ckpt.pth')
-    net.load_state_dict(checkpoint['net'])
-    best_acc = checkpoint['acc']
-    start_epoch = checkpoint['epoch']
+# if args.resume:
+#     # Load checkpoint.
+#     print('==> Resuming from checkpoint..')
+#     assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
+#     checkpoint = torch.load('./checkpoint/ckpt.pth')
+#     net.load_state_dict(checkpoint['net'])
+#     best_acc = checkpoint['acc']
+#     start_epoch = checkpoint['epoch']
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=args.lr,
+optimizer = optim.SGD(net.parameters(), lr=0.1,
                       momentum=0.9, weight_decay=5e-4)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 
@@ -110,9 +110,9 @@ def train(epoch):
         _, predicted = outputs.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
-
-        progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                     % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
+        if ((batch_idx + 1) % 20 == 0 or batch_idx + 1 == len(trainloader)):
+          print(f"batch_idx = {batch_idx} / {len(trainloader)}, Loss: %.3f | Acc: %.3f%% (%d/%d)"
+                      % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
 
 def test(epoch):
@@ -132,7 +132,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+            print(f"batch_idx={batch_idx}, Loss: %.3f | Acc: %.3f%% (%d/%d)"
                          % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
     # Save checkpoint.
