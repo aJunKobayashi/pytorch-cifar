@@ -131,9 +131,9 @@ def test(epoch):
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
-
-            print(f"batch_idx={batch_idx}, Loss: %.3f | Acc: %.3f%% (%d/%d)"
-                         % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
+            if (batch_idx + 1 == len(testloader)):
+                print(f"batch_idx={batch_idx}, Loss: %.3f | Acc: %.3f%% (%d/%d)"
+                    % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
     # Save checkpoint.
     acc = 100.*correct/total
